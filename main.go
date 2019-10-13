@@ -120,19 +120,21 @@ func PrintUserNicknamesFromCsv()  {
 		log.Fatal(err)
 	}
 
-	client := &http.Client{}
-	client.Timeout = time.Second * 15
-
-	var thisResp UserAPIResp
 	var respChan = make(chan UserAPIResp, 0)
 	var limiter = make(chan bool, 10)
 
 	for i := 0; i < len(records); i++ {
 		go func(reqUrl string, respChan chan UserAPIResp, limiter chan bool) {
 			limiter <- true
+
+			client := &http.Client{}
+			client.Timeout = time.Second * 15
+			var thisResp UserAPIResp
+
 			req, _ := http.NewRequest("GET", reqUrl, nil)
 			resp, _ := client.Do(req)
 			defer resp.Body.Close()
+
 			bodyArrBytes, readerr := ioutil.ReadAll(resp.Body)
 			if readerr != nil {
 				log.Printf("Error on decode bytes. %s", readerr)
